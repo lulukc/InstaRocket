@@ -12,3 +12,6 @@ routes.post('/posts', upload.single('image'), PostController.store)
 routes.post('/posts/:id/like',Likecontroller.store)
 
 module.exports = routes
+
+
+
