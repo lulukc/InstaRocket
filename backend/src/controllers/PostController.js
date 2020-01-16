@@ -4,39 +4,37 @@ const path = require('path')
 const fs = require('fs')
 
 module.exports = {
-    async index(req, res) {
-        const posts = await Post.find().sort('-createdAt')
-        return res.json(posts)
+  async index (req, res) {
+    const posts = await Post.find().sort('-createdAt')
+    return res.json(posts)
+  },
 
-    },
+  async store (req, res) {
+    const { author, place, description, hashtags } = req.body
+    const { filename: image } = req.file
 
-    async store(req, res) {
+    const [name] = image.split('.')
+    const fileName = `${name}.jpg`
 
-        const { author, place, description, hashtags } = req.body
-        const { filename: image } = req.file
+    await sharp(req.file.path)
+      .resize(500)
+      .jpeg(70)
+      .toFile(
+        path.resolve(req.file.destination, 'resized', fileName)
+      )
 
-        const [name] = image.split('.')
-        const fileName = `${name}.jpg`
+    fs.unlinkSync(req.file.path)
 
-        await sharp(req.file.path)
-            .resize(500)
-            .jpeg(70)
-            .toFile(
-                path.resolve(req.file.destination, 'resized', fileName)
-            )
+    const post = await Post.create({
+      author,
+      place,
+      description,
+      hashtags,
+      image: fileName
+    })
 
-        fs.unlinkSync(req.file.path)
+    req.io.emit('NewPost', post)
 
-        const post = await Post.create({
-            author,
-            place,
-            description,
-            hashtags,
-            image: fileName,
-        })
-
-        req.io.emit('NewPost', post)
-
-        return res.json(post)
-    },
+    return res.json(post)
+  }
 }

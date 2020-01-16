@@ -9,9 +9,6 @@ const upload = multer(uploadConfig)
 
 routes.get('/posts', PostController.index)
 routes.post('/posts', upload.single('image'), PostController.store)
-routes.post('/posts/:id/like',Likecontroller.store)
+routes.post('/posts/:id/like', Likecontroller.store)
 
 module.exports = routes
-
-
-
